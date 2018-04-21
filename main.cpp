@@ -26,11 +26,11 @@ string replace_line(string line);
 
 void read_file(string filename);
 
-int main() {
+int main(int argc, char** argv) {
     //cout << "Hello, World!" << endl;
 
-    output.open("result.cpp");
-    read_file("demo.cpp");
+    output.open(argv[2]);
+    read_file(argv[1]);
     output.close();
 
     return 0;
