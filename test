@@ -1,0 +1,18 @@
+#include "demo.h"
+#define PI 3.14
+#define a (a+b)
+#ifndef lab
+#define lab
+i know there is a PI in a PI;
+#endif
+
+#undef lab
+#ifdef lab
+???
+#endif
+
+#if 0
+ok
+#else
+not ok
+#endif

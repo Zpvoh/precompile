@@ -4,9 +4,11 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <regex>
 using namespace std;
 
 map<string,string> definations;
+map<string,string>::iterator it;
 
 struct instruct{
     string type;
@@ -26,7 +28,7 @@ void read_file(string filename, string outputname){
     while(getline(file, line)){
         //cout<<line<<endl;
         if(if_stack.empty() || if_stack.front()){
-            if(line.at(0)=='#'){
+            if(!line.empty() && line.at(0)=='#'){
                 istringstream iss(line);
                 instruct ins;
                 iss>>ins.type;
@@ -42,6 +44,7 @@ void read_file(string filename, string outputname){
                     int num;
                     istringstream iss(ins.params[0]);
                     iss>>num;
+                    cout<<num<<endl;
                     if_stack.push_back(num);
                 }else if(ins.type=="#else"){
                     int num=if_stack.front();
@@ -58,12 +61,20 @@ void read_file(string filename, string outputname){
                     if_stack.pop_back();
                 }else if(ins.type=="#undef"){
                     definations.erase(ins.params[0]);
-                }else if(ins.type=="#include"){
-                    read_file(ins.params[0], outputname);
+                }else if(ins.type=="#include" && ins.params[0].at(0)=='\"'){
+                    size_t start_pos=ins.params[0].find('\"')+1;
+                    size_t end_pos=ins.params[0].rfind('\"')-1;
+                    string new_filename =ins.params[0].substr(start_pos, end_pos);
+                    read_file(new_filename, outputname);
                 }else{
                     cout<<"Not Support"<<endl;
                 }
             }else{
+                for(it=definations.begin(); it!=definations.end(); it++){
+                    regex e(it->first);
+                    string fmt=it->second;
+                    line=regex_replace(line, e, fmt);
+                }
                 cout<<line<<endl;
             }
 
@@ -77,7 +88,7 @@ void read_file(string filename, string outputname){
 int main() {
     //cout << "Hello, World!" << endl;
 
-    read_file("demo.cpp", "result.txt");
+    read_file("test", "result.txt");
 
     return 0;
 }
@@ -85,11 +96,15 @@ int main() {
 void handle_define(instruct ins){
     if(ins.params.size()==1){
         definations.insert(pair<string, string>(ins.params[0], ins.params[0]));
-        cout<<ins.params[0]<<" "<<definations[ins.params[0]]<<endl;
+        //cout<<ins.params[0]<<" "<<definations[ins.params[0]]<<endl;
     }else if(ins.params.size()==2){
         definations.insert(pair<string, string>(ins.params[0], ins.params[1]));
-        cout<<ins.params[0]<<" "<<definations[ins.params[0]]<<endl;
+        //cout<<ins.params[0]<<" "<<definations[ins.params[0]]<<endl;
     }
+}
+
+void handle_include(string filename, string outputname){
+
 }
 
 
