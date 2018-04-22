@@ -41,17 +41,75 @@ void handle_define(instruct ins){
         definations.insert(pair<string, string>(ins.params[0], ins.params[0]));
         //cout<<ins.params[0]<<" "<<definations[ins.params[0]]<<endl;
     }else if(ins.params.size()==2){
+
         definations.insert(pair<string, string>(ins.params[0], ins.params[1]));
         //cout<<ins.params[0]<<" "<<definations[ins.params[0]]<<endl;
     }
 }
 
 string replace_line(string line){
+
         for(int i=0; i<definations.size(); i++){
             for(it=definations.begin(); it!=definations.end(); it++){
-            regex e(it->first);
-            string fmt=it->second;
-            line=regex_replace(line, e, fmt);
+                if(it->first.find("(")!=string::npos && it->second.find("#")==string::npos){
+                    size_t start=it->first.find("(");
+                    size_t end=it->first.find(")");
+                    string key=it->first.substr(0, start);
+                    string arg=it->first.substr(start+1, end-start-1);
+                    //cout<<value<<endl;
+                    regex e(key+"\\(([^ ]*)\\)");
+                    string line_fix=line;
+                    //string key_fixed(it->first);
+                    //string value_fixed(it->second);
+                    smatch m;
+                    while(regex_search(line_fix, m, e)){
+                        regex ex(arg);
+                        string value_fixed=regex_replace(it->second, ex, m.format("$1"));
+                        string key_fixed=regex_replace(it->first, ex, "\\("+m.format("$1")+"\\)");
+                        //cout<<key_fixed<<" "<<value_fixed<<endl;
+                        ex.assign(key_fixed);
+                        //cout<<ex.
+                        line=regex_replace(line, ex, value_fixed);
+                        //cout<<line<<key_fixed<<endl;
+                        line_fix=m.suffix().str();
+                    }
+                }else if(it->second.find("#")!=string::npos){
+                    //cout<<"hhh"<<endl;
+                    //smatch m;
+                    
+                    size_t start=it->first.find("(");
+                    size_t end=it->first.find(")");
+                    string key=it->first.substr(0, start);
+                    string arg=it->first.substr(start+1, end-start-1);
+                    //cout<<value<<endl;
+                    regex e(key+"\\(([^ ]*)\\)");
+                    string line_fix=line;
+                    //string key_fixed(it->first);
+                    //string value_fixed(it->second);
+                    smatch m;
+                    while(regex_search(line_fix, m, e)){
+                        regex p("\"([^]*)\"#([^]*)");
+                        regex ex(arg);
+                        string value_fixed;
+                        smatch value_match;
+                        regex_match(it->second, value_match, p);
+                        value_fixed="\""+(value_match.begin()+1)->str()+(value_match.begin()+2)->str()+"\"";
+                        value_fixed=regex_replace(value_fixed, ex, m.format("$1"));
+                        string key_fixed=regex_replace(it->first, ex, "\\("+m.format("$1")+"\\)");
+                        cout<<key_fixed<<" "<<value_fixed<<endl;
+                        ex.assign(key_fixed);
+                        //cout<<ex.
+                        line=regex_replace(line, ex, value_fixed);
+                        cout<<line<<key_fixed<<endl;
+                        line_fix=m.suffix().str();
+                    }
+                }else{
+
+                regex e(it->first);
+                string fmt=it->second;
+                line=regex_replace(line, e, fmt);
+                //cout<<line<<endl;
+                }
             //cout<<line<<endl;
             }
         }
@@ -62,12 +120,7 @@ string replace_line(string line){
 void read_file(string filename){
     string line, word;
     ifstream file(filename.c_str());
-    
-
     while(getline(file, line)){
-        //cout<<line<<endl;
-    
-
         if((if_stack.empty() || if_stack.back()) && line.find("#endif")==string::npos && line.find("#else")==string::npos){
             if(!line.empty() && line.at(0)=='#'){
                 istringstream iss(line);
@@ -75,6 +128,15 @@ void read_file(string filename){
                 iss>>ins.type;
                 //cout<<ins.type<<endl;
                 while(iss>>word){
+                    if(word.find("\"")!=string::npos){
+                        string tmp;
+                        do{
+                            iss>>tmp;
+                            word=word+" "+tmp;
+                            cout<<(!tmp.find("\"")==string::npos)<<endl;
+                        }while(!tmp.find("\"")==string::npos);
+                    }
+
                     ins.params.push_back(word);
                     //cout<<ins.params.front()<<endl;
                 }
@@ -103,7 +165,7 @@ void read_file(string filename){
 
                     size_t start_pos=ins.params[0].find("\"")+1;
                     size_t end_pos=ins.params[0].rfind("\"")-1;
-                    string new_filename =ins.params[0].substr(start_pos, end_pos);
+                    string new_filename =ins.params[0].substr(start_pos, end_pos-start_pos+1);
                     read_file(new_filename);
                 }else{
                     line=replace_line(line);
@@ -122,7 +184,5 @@ void read_file(string filename){
     }
 
     file.close();
-    //output.flush();
-    //output.close();
 }
 

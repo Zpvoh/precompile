@@ -52,11 +52,18 @@ int main(){
 	}
 
 
-	cout<<"Please try to make the test of part 3 work, e.g. add one line in this file !!"<<endl;
+	int d = (2*a);
+	if(d==2*a) {
+		cout<<"PART 3 pass !!!!!"<<endl;
+	} else {
+		cout<<"PART 3 fail !!!!!"<<endl;
+	}
 
 
-	cout<<"Please try to make the test of pluses work, e.g. add one line in this file !!"<<endl;
+	cout<<"PLUSES pass"<<" !!!!!"<<endl;
 
 
 	return 0;
 }
+
+
