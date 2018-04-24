@@ -56,27 +56,25 @@ string replace_line(string line){
                     size_t end=it->first.find(")");
                     string key=it->first.substr(0, start);
                     string arg=it->first.substr(start+1, end-start-1);
-                    //cout<<value<<endl;
                     regex e(key+"\\(([^ ]*)\\)");
                     string line_fix=line;
-                    //string key_fixed(it->first);
-                    //string value_fixed(it->second);
+
                     smatch m;
                     while(regex_search(line_fix, m, e)){
                         regex ex(arg);
                         string value_fixed=regex_replace(it->second, ex, m.format("$1"));
                         string key_fixed=regex_replace(it->first, ex, "\\("+m.format("$1")+"\\)");
-                        //cout<<key_fixed<<" "<<value_fixed<<endl;
+
                         ex.assign(key_fixed);
-                        //cout<<ex.
+
                         line=regex_replace(line, ex, value_fixed);
-                        //cout<<line<<key_fixed<<endl;
                         line_fix=m.suffix().str();
                     }
+
                 }else if(it->second.find("#")!=string::npos){
                     //cout<<"hhh"<<endl;
                     //smatch m;
-                    
+
                     size_t start=it->first.find("(");
                     size_t end=it->first.find(")");
                     string key=it->first.substr(0, start);
@@ -96,11 +94,11 @@ string replace_line(string line){
                         value_fixed="\""+(value_match.begin()+1)->str()+(value_match.begin()+2)->str()+"\"";
                         value_fixed=regex_replace(value_fixed, ex, m.format("$1"));
                         string key_fixed=regex_replace(it->first, ex, "\\("+m.format("$1")+"\\)");
-                        cout<<key_fixed<<" "<<value_fixed<<endl;
+                        //cout<<key_fixed<<" "<<value_fixed<<endl;
                         ex.assign(key_fixed);
                         //cout<<ex.
                         line=regex_replace(line, ex, value_fixed);
-                        cout<<line<<key_fixed<<endl;
+                        //cout<<line<<key_fixed<<endl;
                         line_fix=m.suffix().str();
                     }
                 }else{
@@ -127,20 +125,18 @@ void read_file(string filename){
                 instruct ins;
                 iss>>ins.type;
                 //cout<<ins.type<<endl;
-                while(iss>>word){
-                    if(word.find("\"")!=string::npos){
-                        string tmp;
-                        do{
-                            iss>>tmp;
-                            word=word+" "+tmp;
-                            cout<<(!tmp.find("\"")==string::npos)<<endl;
-                        }while(!tmp.find("\"")==string::npos);
-                    }
-
-                    ins.params.push_back(word);
+                iss>>word;
+                ins.params.push_back(word);
+                
+                string tmp; 
+                iss>>word;
+                while(iss>>tmp){
+                    word=word+" "+tmp;
+                    //cout<<(!tmp.find("\"")==string::npos)<<endl;
                     //cout<<ins.params.front()<<endl;
                 }
-                
+                ins.params.push_back(word);
+
                 if(ins.type=="#define"){
                     handle_define(ins);
                 }else if(ins.type=="#if"){
