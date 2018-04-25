@@ -51,7 +51,7 @@ string replace_line(string line){
 
         for(int i=0; i<definations.size(); i++){
             for(it=definations.begin(); it!=definations.end(); it++){
-                if(it->first.find("(")!=string::npos && it->second.find("#")==string::npos){
+                if(it->first.find("(")!=string::npos){
                     size_t start=it->first.find("(");
                     size_t end=it->first.find(")");
                     string key=it->first.substr(0, start);
@@ -65,42 +65,18 @@ string replace_line(string line){
                         string value_fixed=regex_replace(it->second, ex, m.format("$1"));
                         string key_fixed=regex_replace(it->first, ex, "\\("+m.format("$1")+"\\)");
 
+
+                        if(value_fixed.find("#")!=string::npos){
+                            ex.assign("#([^]*)");
+                            value_fixed=regex_replace(value_fixed, ex, "\"$1\"");
+                        }
+
                         ex.assign(key_fixed);
 
                         line=regex_replace(line, ex, value_fixed);
                         line_fix=m.suffix().str();
                     }
 
-                }else if(it->second.find("#")!=string::npos){
-                    //cout<<"hhh"<<endl;
-                    //smatch m;
-
-                    size_t start=it->first.find("(");
-                    size_t end=it->first.find(")");
-                    string key=it->first.substr(0, start);
-                    string arg=it->first.substr(start+1, end-start-1);
-                    //cout<<value<<endl;
-                    regex e(key+"\\(([^ ]*)\\)");
-                    string line_fix=line;
-                    //string key_fixed(it->first);
-                    //string value_fixed(it->second);
-                    smatch m;
-                    while(regex_search(line_fix, m, e)){
-                        regex p("\"([^]*)\"#([^]*)");
-                        regex ex(arg);
-                        string value_fixed;
-                        smatch value_match;
-                        regex_match(it->second, value_match, p);
-                        value_fixed="\""+(value_match.begin()+1)->str()+(value_match.begin()+2)->str()+"\"";
-                        value_fixed=regex_replace(value_fixed, ex, m.format("$1"));
-                        string key_fixed=regex_replace(it->first, ex, "\\("+m.format("$1")+"\\)");
-                        //cout<<key_fixed<<" "<<value_fixed<<endl;
-                        ex.assign(key_fixed);
-                        //cout<<ex.
-                        line=regex_replace(line, ex, value_fixed);
-                        //cout<<line<<key_fixed<<endl;
-                        line_fix=m.suffix().str();
-                    }
                 }else{
 
                 regex e(it->first);

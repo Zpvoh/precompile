@@ -60,7 +60,7 @@ int main(){
 	}
 
 
-	cout<<"PLUSES pass"<<" !!!!!"<<endl;
+	cout<<"PLUSES ""pass"<<" !!!!!"<<endl;
 
 
 	return 0;
